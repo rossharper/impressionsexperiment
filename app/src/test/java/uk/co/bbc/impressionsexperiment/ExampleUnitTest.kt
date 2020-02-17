@@ -1,4 +1,4 @@
-package uk.co.bbc.impressionsexperiment
+package net.rossharper.impressionsexperiment
 
 import org.junit.Test
 
