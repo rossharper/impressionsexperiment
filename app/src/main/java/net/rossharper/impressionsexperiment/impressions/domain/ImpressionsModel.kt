@@ -1,7 +1,6 @@
 package net.rossharper.impressionsexperiment.impressions.domain
 
-import net.rossharper.impressionsexperiment.Position
-import net.rossharper.impressionsexperiment.Timestamp
+import net.rossharper.impressionsexperiment.impressions.Position
 
 data class ImpressionsModel(
     val positionsAlreadyImpressed: MutableSet<Position> = mutableSetOf(),

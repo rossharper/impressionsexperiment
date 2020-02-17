@@ -1,7 +1,7 @@
 package net.rossharper.impressionsexperiment.impressions.ui
 
 import androidx.recyclerview.widget.RecyclerView
-import net.rossharper.impressionsexperiment.Position
+import net.rossharper.impressionsexperiment.impressions.Position
 
 abstract class ImpressionsVisibilityAdapter<ViewHolderT : RecyclerView.ViewHolder>(private val impressionVisibilityStrategy: ImpressionVisibilityStrategy) : RecyclerView.Adapter<ViewHolderT>(),
     ItemImpressionVisibilityObservable {

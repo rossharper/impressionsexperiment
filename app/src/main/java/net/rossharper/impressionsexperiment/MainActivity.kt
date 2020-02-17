@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item.view.*
+import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.ui.HalfVisibleImpressionVisibilityStrategy
 import net.rossharper.impressionsexperiment.impressions.ui.ImpressionVisibilityObserver
 import net.rossharper.impressionsexperiment.impressions.ui.ImpressionsVisibilityAdapter

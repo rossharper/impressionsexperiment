@@ -1,7 +1,7 @@
 package net.rossharper.impressionsexperiment.impressions.domain.usecases
 
 import android.util.Log
-import net.rossharper.impressionsexperiment.Position
+import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsModel
 
 class ItemBecameNotVisibleUseCase(private val model: ImpressionsModel) {

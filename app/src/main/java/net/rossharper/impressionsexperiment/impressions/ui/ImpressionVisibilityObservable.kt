@@ -1,6 +1,6 @@
 package net.rossharper.impressionsexperiment.impressions.ui
 
-import net.rossharper.impressionsexperiment.Position
+import net.rossharper.impressionsexperiment.impressions.Position
 
 interface ImpressionVisibilityObserver {
     fun onItemBecameVisible(position: Position)
