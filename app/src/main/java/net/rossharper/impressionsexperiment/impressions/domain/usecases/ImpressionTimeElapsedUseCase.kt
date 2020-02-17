@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsModel
+import net.rossharper.impressionsexperiment.impressions.domain.Timestamp
 import java.util.*
 
 class ImpressionTimeElapsedUseCase(private val model: ImpressionsModel) {
@@ -24,14 +25,17 @@ class ImpressionTimeElapsedUseCase(private val model: ImpressionsModel) {
         while (iterator.hasNext()) {
             iterator.next().let {
                 val (position, timestamp) = it
-                if (Calendar.getInstance().timeInMillis - timestamp > 1000) { // TODO: extract constant, time provider
+                if (hasBeenVisibleForLongEnough(timestamp)) { // TODO: extract constant, time provider
                     iterator.remove()
                     sendImpression(position)
-                    model.positionsAlreadyImpressed.add(position)
+                    model.impressionsSent.add(position)
                 }
             }
         }
     }
+
+    private fun hasBeenVisibleForLongEnough(timestamp: Timestamp) =
+        Calendar.getInstance().timeInMillis - timestamp > 1000
 
     private fun sendImpression(position: Position) {
         Log.i("IMPRESSIONS", "Impression for position $position")

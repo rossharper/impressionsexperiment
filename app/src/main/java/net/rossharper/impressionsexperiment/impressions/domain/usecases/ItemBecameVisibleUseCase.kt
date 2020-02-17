@@ -12,12 +12,15 @@ class ItemBecameVisibleUseCase(private val model: ImpressionsModel, private val 
     fun execute(position: Position) {
         // TODO: thread safety - synchronise adding/removing/reading from maps
         Log.i("IMPRESSIONS", "Position ${position} became visible")
-        if (!model.positionsAlreadyImpressed.contains(position)) {
+        if (impressionNotAlreadySent(position)) {
             Log.i("IMPRESSIONS", "Position ${position} not impressed yet")
             addVisiblePosition(position)
             waitForImpressions()
         }
     }
+
+    private fun impressionNotAlreadySent(position: Position) =
+        !model.impressionsSent.contains(position)
 
     private fun addVisiblePosition(position: Position) {
         model.visiblePositionsByTimestamp[position] = Calendar.getInstance().timeInMillis // TODO: extract time provision
