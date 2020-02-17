@@ -6,9 +6,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsModel
+import net.rossharper.impressionsexperiment.impressions.domain.TimestampProvider
 import java.util.*
 
-class ItemBecameVisibleUseCase(private val model: ImpressionsModel, private val impressionTimeElapsedUseCase: ImpressionTimeElapsedUseCase) {
+class ItemBecameVisibleUseCase(
+    private val model: ImpressionsModel,
+    private val impressionTimeElapsedUseCase: ImpressionTimeElapsedUseCase,
+    private val timestampProvider: TimestampProvider,
+    private val impressionDurationThresholdMillis : Long
+) {
     fun execute(position: Position) {
         // TODO: thread safety - synchronise adding/removing/reading from maps
         Log.i("IMPRESSIONS", "Position ${position} became visible")
@@ -23,14 +29,14 @@ class ItemBecameVisibleUseCase(private val model: ImpressionsModel, private val 
         !model.impressionsSent.contains(position)
 
     private fun addVisiblePosition(position: Position) {
-        model.visiblePositionsByTimestamp[position] = Calendar.getInstance().timeInMillis // TODO: extract time provision
+        model.visiblePositionsByTimestamp[position] = timestampProvider.timeInMillis
     }
 
     private fun waitForImpressions() {
         if (!model.timerActive) {
             model.timerActive = true
             GlobalScope.launch {
-                delay(1000) // TODO: extract constant
+                delay(impressionDurationThresholdMillis)
                 impressionTimeElapsedUseCase.execute()
             }
             Log.i("IMPRESSIONS", "Timer started")
