@@ -1,0 +1,365 @@
+Index: app/src/main/java/uk/co/bbc/impressionsexperiment/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package uk.co.bbc.impressionsexperiment\n\nimport android.graphics.Color\n\nimport androidx.appcompat.app.AppCompatActivity\nimport android.os.Bundle\nimport android.util.Log\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport androidx.recyclerview.widget.LinearLayoutManager\nimport androidx.recyclerview.widget.RecyclerView\nimport kotlinx.android.synthetic.main.activity_main.*\nimport kotlinx.android.synthetic.main.item.view.*\n\n\n\nclass MainActivity : AppCompatActivity() {\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        setContentView(R.layout.activity_main)\n\n        list.apply {\n            layoutManager = LinearLayoutManager(this@MainActivity)\n            adapter = MyAdapter().apply {\n                onImpressionListener = {\n                    Log.i(\"IMPRESSION\", \"Impression for position $it\")\n                }\n            }\n        }\n    }\n}\n\nobject SystemTimeStampProvider : TimeStampProvider {\n    override fun now(): TimeStamp {\n        return TimeStamp(System.currentTimeMillis())\n    }\n}\n\nprivate val impressionStrategy =\n    SeenOnceStrategy(\n        VisibleForDurationStrategy(\n            duration = 1.seconds,\n            visibilityStrategy = HalfVisibleImpressionStrategy(),\n            timeStampProvider = SystemTimeStampProvider\n        )\n    )\n\nclass MyAdapter : ImpressionsAdapter<MyAdapter.ViewHolder>(impressionStrategy) {\n\n    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {\n        fun bind(number: Int) {\n            itemView.label.text = number.toString()\n\n            if (number % 2 == 0)\n                itemView.setBackgroundColor(Color.RED)\n            else\n                itemView.setBackgroundColor(Color.BLUE)\n        }\n    }\n\n    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {\n        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item, parent, false))\n    }\n\n    override fun getItemCount(): Int = 128\n\n    override fun onBindViewHolder(holder: ViewHolder, position: Int) {\n        holder.bind(position)\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/uk/co/bbc/impressionsexperiment/MainActivity.kt	(date 1575556047000)
++++ app/src/main/java/uk/co/bbc/impressionsexperiment/MainActivity.kt	(date 1575565810000)
+@@ -38,16 +38,9 @@
+     }
+ }
+ 
+-private val impressionStrategy =
+-    SeenOnceStrategy(
+-        VisibleForDurationStrategy(
+-            duration = 1.seconds,
+-            visibilityStrategy = HalfVisibleImpressionStrategy(),
+-            timeStampProvider = SystemTimeStampProvider
+-        )
+-    )
+ 
+-class MyAdapter : ImpressionsAdapter<MyAdapter.ViewHolder>(impressionStrategy) {
++
++class MyAdapter : ImpressionsAdapter<MyAdapter.ViewHolder>(SystemTimeStampProvider) {
+ 
+     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+         fun bind(number: Int) {
+Index: app/src/main/java/uk/co/bbc/impressionsexperiment/VisibleForDurationStrategy.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package uk.co.bbc.impressionsexperiment\n\nimport android.view.View\n\n// TODO: doesnt fire unless on draw\nclass VisibleForDurationStrategy constructor(\n    private val duration: Duration = 1.seconds,\n    private val visibilityStrategy: ImpressionStrategy = HalfVisibleImpressionStrategy(),\n    private val timeStampProvider: TimeStampProvider\n) : ImpressionStrategy {\n\n    private val becameVisibleTimeStamps = HashMap<Position, TimeStamp>()\n\n    override fun startTrackingView(position: Int, view: View) {\n        becameVisibleTimeStamps[position] = timeStampProvider.now()\n        visibilityStrategy.startTrackingView(position, view)\n    }\n\n    override fun endTrackingView(position: Int) {\n        becameVisibleTimeStamps.remove(position)\n        visibilityStrategy.endTrackingView(position)\n    }\n\n    override fun detectImpressions(): Collection<Position> {\n        val now = timeStampProvider.now()\n        return visibilityStrategy.detectImpressions().filter {\n            now.milliseconds - becameVisibleTimeStamps[it]!!.milliseconds >= duration.milliseconds\n        }\n    }\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/uk/co/bbc/impressionsexperiment/VisibleForDurationStrategy.kt	(date 1575556047000)
++++ app/src/main/java/uk/co/bbc/impressionsexperiment/VisibleForDurationStrategy.kt	(date 1575559514000)
+@@ -2,30 +2,30 @@
+ 
+ import android.view.View
+ 
+-// TODO: doesnt fire unless on draw
+-class VisibleForDurationStrategy constructor(
+-    private val duration: Duration = 1.seconds,
+-    private val visibilityStrategy: ImpressionStrategy = HalfVisibleImpressionStrategy(),
+-    private val timeStampProvider: TimeStampProvider
+-) : ImpressionStrategy {
+-
+-    private val becameVisibleTimeStamps = HashMap<Position, TimeStamp>()
+-
+-    override fun startTrackingView(position: Int, view: View) {
+-        becameVisibleTimeStamps[position] = timeStampProvider.now()
+-        visibilityStrategy.startTrackingView(position, view)
+-    }
+-
+-    override fun endTrackingView(position: Int) {
+-        becameVisibleTimeStamps.remove(position)
+-        visibilityStrategy.endTrackingView(position)
+-    }
+-
+-    override fun detectImpressions(): Collection<Position> {
+-        val now = timeStampProvider.now()
+-        return visibilityStrategy.detectImpressions().filter {
+-            now.milliseconds - becameVisibleTimeStamps[it]!!.milliseconds >= duration.milliseconds
+-        }
+-    }
+-
+-}
+\ No newline at end of file
++//// TODO: doesnt fire unless on draw
++//class VisibleForDurationStrategy constructor(
++//    private val duration: Duration = 1.seconds,
++//    private val visibilityStrategy: ImpressionStrategy = HalfVisibleImpressionStrategy(),
++//    private val timeStampProvider: TimeStampProvider
++//) : ImpressionStrategy {
++//
++//    private val becameVisibleTimeStamps = HashMap<Position, TimeStamp>()
++//
++//    override fun startTrackingView(position: Int, view: View) {
++//        becameVisibleTimeStamps[position] = timeStampProvider.now()
++//        visibilityStrategy.startTrackingView(position, view)
++//    }
++//
++//    override fun endTrackingView(position: Int) {
++//        becameVisibleTimeStamps.remove(position)
++//        visibilityStrategy.endTrackingView(position)
++//    }
++//
++//    override fun detectImpressions(): Collection<Position> {
++//        val now = timeStampProvider.now()
++//        return visibilityStrategy.detectImpressions().filter {
++//            now.milliseconds - becameVisibleTimeStamps[it]!!.milliseconds >= duration.milliseconds
++//        }
++//    }
++//
++//}
+\ No newline at end of file
+Index: app/src/main/java/uk/co/bbc/impressionsexperiment/HalfVisibleImpressionStrategy.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package uk.co.bbc.impressionsexperiment\n\nimport android.graphics.Rect\nimport android.view.View\n\nclass HalfVisibleImpressionStrategy : ImpressionStrategy {\n\n    private val trackedViews = HashMap<Position, View>()\n\n    override fun startTrackingView(position: Int, view: View) {\n        trackedViews[position] = view\n    }\n\n    override fun endTrackingView(position: Int) {\n        trackedViews.remove(position)\n    }\n\n    override fun detectImpressions(): Collection<Position> {\n        return trackedViews.keys.filter { it.isImpression }\n    }\n\n    private val Position.isImpression: Boolean\n        get() {\n            return trackedViews[this]?.let {view ->\n                view.isAtLeastHalfVisible\n            } ?: false\n        }\n\n    private val View.isAtLeastHalfVisible: Boolean\n        get() {\n            val proportionVisible = visibleArea.toFloat() / area\n            //Log.i(\"IMPRESSION\", \"area: $area visibleArea: $visibleArea proportion: $proportionVisible\")\n            return proportionVisible > 0.5\n        }\n\n    private val View.area : Int\n        get() {\n            return width * height\n        }\n\n    private val View.visibleArea : Int\n        get() {\n            return Rect().let {\n                getGlobalVisibleRect(it)\n                it.area\n            }\n        }\n\n    private val Rect.area : Int\n        get() {\n            return this.width() * this.height()\n        }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/uk/co/bbc/impressionsexperiment/HalfVisibleImpressionStrategy.kt	(date 1575556047000)
++++ app/src/main/java/uk/co/bbc/impressionsexperiment/HalfVisibleImpressionStrategy.kt	(date 1575559514000)
+@@ -3,51 +3,43 @@
+ import android.graphics.Rect
+ import android.view.View
+ 
+-class HalfVisibleImpressionStrategy : ImpressionStrategy {
+-
+-    private val trackedViews = HashMap<Position, View>()
+-
+-    override fun startTrackingView(position: Int, view: View) {
+-        trackedViews[position] = view
+-    }
+-
+-    override fun endTrackingView(position: Int) {
+-        trackedViews.remove(position)
+-    }
+-
+-    override fun detectImpressions(): Collection<Position> {
+-        return trackedViews.keys.filter { it.isImpression }
+-    }
+-
+-    private val Position.isImpression: Boolean
+-        get() {
+-            return trackedViews[this]?.let {view ->
+-                view.isAtLeastHalfVisible
+-            } ?: false
+-        }
+-
+-    private val View.isAtLeastHalfVisible: Boolean
+-        get() {
+-            val proportionVisible = visibleArea.toFloat() / area
+-            //Log.i("IMPRESSION", "area: $area visibleArea: $visibleArea proportion: $proportionVisible")
+-            return proportionVisible > 0.5
+-        }
+-
+-    private val View.area : Int
+-        get() {
+-            return width * height
+-        }
+-
+-    private val View.visibleArea : Int
+-        get() {
+-            return Rect().let {
+-                getGlobalVisibleRect(it)
+-                it.area
+-            }
+-        }
+-
+-    private val Rect.area : Int
+-        get() {
+-            return this.width() * this.height()
+-        }
+-}
+\ No newline at end of file
++//class HalfVisibleImpressionStrategy : ImpressionStrategy {
++//
++//
++//
++//
++//
++//
++//
++//    private val Position.isImpression: Boolean
++//        get() {
++//            return trackedViews[this]?.let {view ->
++//                view.isAtLeastHalfVisible
++//            } ?: false
++//        }
++//
++//    private val View.isAtLeastHalfVisible: Boolean
++//        get() {
++//            val proportionVisible = visibleArea.toFloat() / area
++//            //Log.i("IMPRESSION", "area: $area visibleArea: $visibleArea proportion: $proportionVisible")
++//            return proportionVisible > 0.5
++//        }
++//
++//    private val View.area : Int
++//        get() {
++//            return width * height
++//        }
++//
++//    private val View.visibleArea : Int
++//        get() {
++//            return Rect().let {
++//                getGlobalVisibleRect(it)
++//                it.area
++//            }
++//        }
++//
++//    private val Rect.area : Int
++//        get() {
++//            return this.width() * this.height()
++//        }
++//}
+\ No newline at end of file
+Index: app/src/main/java/uk/co/bbc/impressionsexperiment/ImpressionsAdapter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package uk.co.bbc.impressionsexperiment\n\nimport androidx.recyclerview.widget.RecyclerView\n\nabstract class ImpressionsAdapter<ViewHolderT : RecyclerView.ViewHolder>(private val impressionStrategy: ImpressionStrategy) : RecyclerView.Adapter<ViewHolderT>(), ItemImpressionObservable {\n\n    override var onImpressionListener: ImpressionListener? = null\n\n    override fun onViewAttachedToWindow(holder: ViewHolderT) {\n        super.onViewAttachedToWindow(holder)\n\n        impressionStrategy.startTrackingView(holder.adapterPosition, holder.itemView)\n    }\n\n    override fun onViewDetachedFromWindow(holder: ViewHolderT) {\n        super.onViewDetachedFromWindow(holder)\n\n        impressionStrategy.endTrackingView(holder.adapterPosition)\n    }\n\n    private val onDrawListener = {\n        impressionStrategy.detectImpressions().forEach { position ->\n            onImpressionListener?.invoke(position)\n        }\n    }\n\n    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {\n        super.onAttachedToRecyclerView(recyclerView)\n\n        recyclerView.viewTreeObserver.addOnDrawListener(onDrawListener)\n    }\n\n    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {\n        super.onDetachedFromRecyclerView(recyclerView)\n\n        recyclerView.viewTreeObserver.removeOnDrawListener(onDrawListener)\n    }\n}\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/uk/co/bbc/impressionsexperiment/ImpressionsAdapter.kt	(date 1575556047000)
++++ app/src/main/java/uk/co/bbc/impressionsexperiment/ImpressionsAdapter.kt	(date 1575565810000)
+@@ -1,26 +1,47 @@
+ package uk.co.bbc.impressionsexperiment
+ 
++import android.graphics.Rect
++import android.os.Handler
++import android.view.View
++import android.view.ViewTreeObserver
++import androidx.core.os.postDelayed
+ import androidx.recyclerview.widget.RecyclerView
+ 
+-abstract class ImpressionsAdapter<ViewHolderT : RecyclerView.ViewHolder>(private val impressionStrategy: ImpressionStrategy) : RecyclerView.Adapter<ViewHolderT>(), ItemImpressionObservable {
++
++
++abstract class ImpressionsAdapter<ViewHolderT : RecyclerView.ViewHolder>(private val timeStampProvider: TimeStampProvider) : RecyclerView.Adapter<ViewHolderT>(), ItemImpressionObservable {
++
++    private val minimumProportionVisible = 0.5
++    private val minDurationMilliseconds = 1000L
+ 
+     override var onImpressionListener: ImpressionListener? = null
+ 
++    // TODO: change these types to maintain order
++    private val impressionsFired = HashSet<Position>()
++    private val becameVisibleTimeStamps = HashMap<Position, TimeStamp>()
++    private val matchedVisibilityAndDurationCriteria = HashSet<Position>()
++    private val trackedViews = HashMap<Position, View>()
++
++    private val handler = Handler()
++
+     override fun onViewAttachedToWindow(holder: ViewHolderT) {
+         super.onViewAttachedToWindow(holder)
+ 
+-        impressionStrategy.startTrackingView(holder.adapterPosition, holder.itemView)
++        if (!impressionsFired.contains(holder.adapterPosition))
++            startTrackingView(holder.adapterPosition, holder.itemView)
+     }
+ 
+     override fun onViewDetachedFromWindow(holder: ViewHolderT) {
+         super.onViewDetachedFromWindow(holder)
+ 
+-        impressionStrategy.endTrackingView(holder.adapterPosition)
++        endTrackingView(holder.adapterPosition)
+     }
+ 
+-    private val onDrawListener = {
+-        impressionStrategy.detectImpressions().forEach { position ->
+-            onImpressionListener?.invoke(position)
++    private val onDrawListener = object : ViewTreeObserver.OnDrawListener {
++        override fun onDraw() {
++            handler.postAtFrontOfQueue {
++                detectImpressions()
++            }
+         }
+     }
+ 
+@@ -35,5 +56,101 @@
+ 
+         recyclerView.viewTreeObserver.removeOnDrawListener(onDrawListener)
+     }
++
++    private fun startTrackingView(position: Int, view: View) {
++        trackedViews[position] = view
++    }
++
++    private fun endTrackingView(position: Int) {
++        trackedViews.remove(position)
++    }
++
++    private fun detectImpressions() {
++        trackedViews.keys.forEach { position ->
++            if (position.matchesVisibilityCriteria) {
++                if (!becameVisibleTimeStamps.containsKey(position)) {
++                    becameVisibleTimeStamps[position] = timeStampProvider.now()
++                }
++            } else {
++                if(position.matchesDurationCriteria) {
++                    matchedVisibilityAndDurationCriteria.add(position)
++                }
++                becameVisibleTimeStamps.remove(position)
++            }
++        }
++        notifyMatchedImpressions()
++        if (becameVisibleTimeStamps.isNotEmpty()) {
++            // this needs to be some sort of looper really
++            handler.postDelayed(minDurationMilliseconds) {
++                becameVisibleTimeStamps.forEach { (position, timeStamp) ->
++                    if (timeStamp.matchesDurationCriteria) {
++                        matchedVisibilityAndDurationCriteria.add(position)
++                        becameVisibleTimeStamps.remove(position)
++                    }
++                }
++                notifyMatchedImpressions()
++            }
++        }
++    }
++
++    private fun notifyMatchedImpressions() {
++        matchedVisibilityAndDurationCriteria.apply {
++            onImpressionListener?.let { listener ->
++                forEach { position ->
++                    listener.invoke(position)
++                }
++            }
++            clear()
++        }
++    }
++
++    private val Position.matchesDurationCriteria: Boolean
++        get() {
++            return becameVisibleTimeStamps[this]?.matchesDurationCriteria ?: false
++        }
++
++    private val TimeStamp.matchesDurationCriteria: Boolean
++        get() {
++            return timeStampProvider.now().milliseconds - this.milliseconds >= minDurationMilliseconds
++        }
++
++
++    private val Map<Position, View>.matchingVisibilityCriteria: Map<Position, View>
++        get() {
++            return this.filter { it.key.matchesVisibilityCriteria }
++        }
++
++
++    private val Position.matchesVisibilityCriteria: Boolean
++        get() {
++            return trackedViews[this]?.matchesVisibilityCriteria ?: false
++        }
++
++
++
++    private val View.matchesVisibilityCriteria: Boolean
++        get() {
++            val proportionVisible = visibleArea.toFloat() / area
++            //Log.i("IMPRESSION", "area: $area visibleArea: $visibleArea proportion: $proportionVisible")
++            return proportionVisible > minimumProportionVisible
++        }
++
++    private val View.area : Int
++        get() {
++            return width * height
++        }
++
++    private val View.visibleArea : Int
++        get() {
++            return Rect().let {
++                getGlobalVisibleRect(it)
++                it.area
++            }
++        }
++
++    private val Rect.area : Int
++        get() {
++            return this.width() * this.height()
++        }
+ }
+ 
