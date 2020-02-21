@@ -4,32 +4,30 @@ import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsModel
 import net.rossharper.impressionsexperiment.impressions.domain.TimestampProvider
-import java.util.*
 
-class ItemBecameVisibleUseCase(
-    private val model: ImpressionsModel,
-    private val impressionTimeElapsedUseCase: ImpressionTimeElapsedUseCase,
+class ItemBecameVisibleUseCase<ItemDescriptorT>(
+    private val model: ImpressionsModel<ItemDescriptorT>,
+    private val impressionTimeElapsedUseCase: ImpressionTimeElapsedUseCase<ItemDescriptorT>,
     private val timestampProvider: TimestampProvider,
     private val impressionDurationThresholdMillis : Long
 ) {
-    fun execute(position: Position) {
+    fun execute(itemDescriptor: ItemDescriptorT) {
         // TODO: thread safety - synchronise adding/removing/reading from maps
-        Log.v("IMPRESSIONS", "Position ${position} became visible")
-        if (impressionNotAlreadySent(position)) {
-            Log.v("IMPRESSIONS", "Position ${position} not impressed yet")
-            addVisiblePosition(position)
+        Log.v("IMPRESSIONS", "Item $itemDescriptor became visible")
+        if (impressionNotAlreadySent(itemDescriptor)) {
+            Log.v("IMPRESSIONS", "Item $itemDescriptor not impressed yet")
+            addVisibleItem(itemDescriptor)
             waitForImpressions()
         }
     }
 
-    private fun impressionNotAlreadySent(position: Position) =
-        !model.impressionsSent.contains(position)
+    private fun impressionNotAlreadySent(itemDescriptor: ItemDescriptorT) =
+        !model.impressionsSent.contains(itemDescriptor)
 
-    private fun addVisiblePosition(position: Position) {
-        model.visiblePositionsByTimestamp[position] = timestampProvider.timeInMillis
+    private fun addVisibleItem(itemDescriptor: ItemDescriptorT) {
+        model.visiblePositionsByTimestamp[itemDescriptor] = timestampProvider.timeInMillis
     }
 
     private fun waitForImpressions() {

@@ -8,17 +8,11 @@ import java.util.*
 
 const val IMPRESSION_DURATION_THRESHOLD: Long = 1000
 
-fun createImpressionItemVisibilityObserver(impressionObserver: ImpressionObserver): ItemVisibilityObserver {
-    with(createImpressionsUseCases(impressionObserver)) {
-        return ImpressionItemVisibilityObserver(
-            itemBecameVisibleUseCase,
-            itemBecameNotVisibleUseCase
-        )
-    }
-}
+fun <ItemDescriptorT> createImpressionsTracker(
+    impressionObserver: ImpressionObserver <ItemDescriptorT>)
+        : ImpressionsTracker<ItemDescriptorT> {
 
-private fun createImpressionsUseCases(impressionObserver: ImpressionObserver): ImpressionsUseCases {
-    val impressionsModel = ImpressionsModel()
+    val impressionsModel = ImpressionsModel<ItemDescriptorT>()
     val timestampProvider = object : TimestampProvider {
         override val timeInMillis: Long
             get() = Calendar.getInstance().timeInMillis
@@ -42,13 +36,5 @@ private fun createImpressionsUseCases(impressionObserver: ImpressionObserver): I
             impressionsModel
         )
 
-    return ImpressionsUseCases(
-        itemBecameVisibleUseCase,
-        itemBecameNotVisibleUseCase
-    )
+    return ImpressionsTrackerImpl(itemBecameVisibleUseCase, itemBecameNotVisibleUseCase)
 }
-
-data class ImpressionsUseCases(
-    val itemBecameVisibleUseCase: ItemBecameVisibleUseCase,
-    val itemBecameNotVisibleUseCase: ItemBecameNotVisibleUseCase
-)

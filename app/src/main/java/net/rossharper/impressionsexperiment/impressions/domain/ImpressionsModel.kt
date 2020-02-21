@@ -1,10 +1,8 @@
 package net.rossharper.impressionsexperiment.impressions.domain
 
-import net.rossharper.impressionsexperiment.impressions.Position
-
-data class ImpressionsModel(
-    val impressionsSent: MutableSet<Position> = mutableSetOf(),
-    val visiblePositionsByTimestamp: MutableMap<Position, Timestamp> = mutableMapOf()
+data class ImpressionsModel<ItemDescriptorT>(
+    val impressionsSent: MutableSet<ItemDescriptorT> = mutableSetOf(),
+    val visiblePositionsByTimestamp: MutableMap<ItemDescriptorT, Timestamp> = mutableMapOf()
 ) {
     @get:Synchronized @set:Synchronized
     var timerActive: Boolean = false

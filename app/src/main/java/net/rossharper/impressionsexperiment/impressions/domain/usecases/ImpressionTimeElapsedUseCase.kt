@@ -4,17 +4,16 @@ import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionObserver
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsModel
 import net.rossharper.impressionsexperiment.impressions.domain.Timestamp
 import net.rossharper.impressionsexperiment.impressions.domain.TimestampProvider
 
-class ImpressionTimeElapsedUseCase(
-    private val model: ImpressionsModel,
+class ImpressionTimeElapsedUseCase<ItemDescriptorT>(
+    private val model: ImpressionsModel<ItemDescriptorT>,
     private val timestampProvider: TimestampProvider,
     private val impressionDurationThresholdMillis: Long,
-    private val impressionObserver: ImpressionObserver
+    private val impressionObserver: ImpressionObserver<ItemDescriptorT>
 ) {
     fun execute() {
         sendImpressions()
@@ -47,8 +46,8 @@ class ImpressionTimeElapsedUseCase(
         return timestampProvider.timeInMillis - timestamp
     }
 
-    private fun sendImpression(position: Position) {
-        impressionObserver.onImpression(position)
+    private fun sendImpression(itemDescriptor: ItemDescriptorT) {
+        impressionObserver.onImpression(itemDescriptor)
     }
 
     private fun waitForImpressions() {

@@ -4,7 +4,7 @@ import net.rossharper.impressionsexperiment.impressions.Position
 
 interface ItemVisibilityObserver {
     fun onItemBecameVisible(position: Position)
-    fun onItemBecameNotVisible(position: Position)
+    fun onItemBecameNotVisible(itemDescriptor: Position)
 }
 
 interface ItemVisibilityObservable {

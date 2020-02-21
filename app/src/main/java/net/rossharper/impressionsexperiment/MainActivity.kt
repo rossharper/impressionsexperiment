@@ -15,8 +15,10 @@ import kotlinx.android.synthetic.main.item.view.*
 import kotlinx.android.synthetic.main.section.view.*
 import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionObserver
-import net.rossharper.impressionsexperiment.impressions.domain.createImpressionItemVisibilityObserver
+import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsTracker
+import net.rossharper.impressionsexperiment.impressions.domain.createImpressionsTracker
 import net.rossharper.impressionsexperiment.impressions.ui.HalfVisibleItemVisibilityStrategy
+import net.rossharper.impressionsexperiment.impressions.ui.ItemVisibilityObserver
 import net.rossharper.impressionsexperiment.impressions.ui.ItemVisibilityTrackingAdapter
 
 class MainActivity : AppCompatActivity() {
@@ -34,17 +36,46 @@ class MainActivity : AppCompatActivity() {
 
 class MySectionsAdapter : RecyclerView.Adapter<MySectionsAdapter.ViewHolder>() {
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    data class SectionItemDescriptor(val sectionIndex: Int, val itemIndex: Int)
+
+    private val impressionObserver = object : ImpressionObserver<SectionItemDescriptor> {
+        override fun onImpression(itemDescriptor: SectionItemDescriptor) {
+            Log.i(
+                "IMPRESSIONS",
+                "Impression at Section ${itemDescriptor.sectionIndex}, Item ${itemDescriptor.itemIndex}"
+            )
+        }
+    }
+
+    private val impressionsTracker = createImpressionsTracker(impressionObserver)
+
+    class ViewHolder(
+        itemView: View,
+        private val impressionsTracker: ImpressionsTracker<SectionItemDescriptor>
+    ) : RecyclerView.ViewHolder(itemView) {
         fun bind() {
             itemView.list.apply {
-                layoutManager = LinearLayoutManager(itemView.context, RecyclerView.HORIZONTAL, false)
+                layoutManager = LinearLayoutManager(
+                    itemView.context,
+                    RecyclerView.HORIZONTAL,
+                    false
+                )
 
                 adapter = MySectionItemsAdapter().apply {
-                    itemVisibilityObserver = createImpressionItemVisibilityObserver(object : ImpressionObserver {
-                        override fun onImpression(position: Position) {
-                            Log.i("IMPRESSION", "Impression for item $position in section $adapterPosition")
+                    itemVisibilityObserver = object : ItemVisibilityObserver {
+                        override fun onItemBecameVisible(position: Position) {
+                            this@ViewHolder.impressionsTracker.onItemBecameVisible(
+                                SectionItemDescriptor(adapterPosition, position)
+                            )
                         }
-                    })
+
+                        override fun onItemBecameNotVisible(position: Position) {
+                            this@ViewHolder.impressionsTracker.onItemBecameNotVisible(
+                                SectionItemDescriptor(adapterPosition, position)
+                            )
+                        }
+
+                    }
                 }
             }
         }
@@ -56,7 +87,8 @@ class MySectionsAdapter : RecyclerView.Adapter<MySectionsAdapter.ViewHolder>() {
                 R.layout.section,
                 parent,
                 false
-            )
+            ),
+            impressionsTracker
         )
     }
 
