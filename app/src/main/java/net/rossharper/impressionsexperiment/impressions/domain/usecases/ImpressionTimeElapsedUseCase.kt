@@ -12,9 +12,10 @@ import net.rossharper.impressionsexperiment.impressions.domain.TimestampProvider
 class ImpressionTimeElapsedUseCase<ItemDescriptorT>(
     private val model: ImpressionsModel<ItemDescriptorT>,
     private val timestampProvider: TimestampProvider,
-    private val impressionDurationThresholdMillis: Long,
-    private val impressionObserver: ImpressionObserver<ItemDescriptorT>
+    private val impressionDurationThresholdMillis: Long
 ) {
+    var observer: ImpressionObserver<ItemDescriptorT>? = null
+
     fun execute() {
         sendImpressions()
 
@@ -47,7 +48,7 @@ class ImpressionTimeElapsedUseCase<ItemDescriptorT>(
     }
 
     private fun sendImpression(itemDescriptor: ItemDescriptorT) {
-        impressionObserver.onImpression(itemDescriptor)
+        observer?.onImpression(itemDescriptor)
     }
 
     private fun waitForImpressions() {

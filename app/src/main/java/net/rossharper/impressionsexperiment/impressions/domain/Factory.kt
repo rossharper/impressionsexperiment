@@ -7,9 +7,7 @@ import java.util.*
 
 const val IMPRESSION_DURATION_THRESHOLD: Long = 1000
 
-fun <ItemDescriptorT> createImpressionsTracker(
-    impressionObserver: ImpressionObserver <ItemDescriptorT>)
-        : ImpressionsTracker<ItemDescriptorT> {
+fun <ItemDescriptorT> createImpressionsTracker(): ImpressionsTracker<ItemDescriptorT> {
 
     val impressionsModel = ImpressionsModel<ItemDescriptorT>()
     val timestampProvider = object : TimestampProvider {
@@ -19,8 +17,7 @@ fun <ItemDescriptorT> createImpressionsTracker(
     val impressionTimeElapsedUseCase = ImpressionTimeElapsedUseCase(
         impressionsModel,
         timestampProvider,
-        IMPRESSION_DURATION_THRESHOLD,
-        impressionObserver
+        IMPRESSION_DURATION_THRESHOLD
 
     )
     val itemBecameVisibleUseCase =
@@ -35,5 +32,9 @@ fun <ItemDescriptorT> createImpressionsTracker(
             impressionsModel
         )
 
-    return UseCaseImpressionsTracker(itemBecameVisibleUseCase, itemBecameNotVisibleUseCase)
+    return UseCaseImpressionsTracker(
+        itemBecameVisibleUseCase,
+        itemBecameNotVisibleUseCase,
+        impressionTimeElapsedUseCase
+    )
 }
