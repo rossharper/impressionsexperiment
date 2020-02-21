@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.item.view.*
 import kotlinx.android.synthetic.main.section.view.*
 import net.rossharper.impressionsexperiment.impressions.Position
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionObserver
-import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsTracker
 import net.rossharper.impressionsexperiment.impressions.domain.createImpressionsTracker
 import net.rossharper.impressionsexperiment.impressions.ui.HalfVisibleItemVisibilityStrategy
 import net.rossharper.impressionsexperiment.impressions.ui.ItemVisibilityObserver
@@ -27,31 +26,29 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val impressionObserver = object : ImpressionObserver<SectionItemDescriptor> {
+            override fun onImpression(itemDescriptor: SectionItemDescriptor) {
+                Log.i(
+                    "IMPRESSIONS",
+                    "Impression at Section ${itemDescriptor.sectionIndex}, Item ${itemDescriptor.itemIndex}"
+                )
+            }
+        }
+
         list.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = MySectionsAdapter()
+            adapter = MySectionsAdapter(createImpressionsTracker(impressionObserver))
         }
     }
 }
 
-class MySectionsAdapter : RecyclerView.Adapter<MySectionsAdapter.ViewHolder>() {
+data class SectionItemDescriptor(val sectionIndex: Int, val itemIndex: Int)
 
-    data class SectionItemDescriptor(val sectionIndex: Int, val itemIndex: Int)
+class MySectionsAdapter(private val itemVisibilityObserver: ItemVisibilityObserver<SectionItemDescriptor>) :
+    RecyclerView.Adapter<MySectionsAdapter.ViewHolder>() {
 
-    private val impressionObserver = object : ImpressionObserver<SectionItemDescriptor> {
-        override fun onImpression(itemDescriptor: SectionItemDescriptor) {
-            Log.i(
-                "IMPRESSIONS",
-                "Impression at Section ${itemDescriptor.sectionIndex}, Item ${itemDescriptor.itemIndex}"
-            )
-        }
-    }
-
-    private val impressionsTracker = createImpressionsTracker(impressionObserver)
-
-    class ViewHolder(
-        itemView: View,
-        private val impressionsTracker: ImpressionsTracker<SectionItemDescriptor>
+    inner class ViewHolder(
+        itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
         fun bind() {
             itemView.list.apply {
@@ -62,19 +59,18 @@ class MySectionsAdapter : RecyclerView.Adapter<MySectionsAdapter.ViewHolder>() {
                 )
 
                 adapter = MySectionItemsAdapter().apply {
-                    itemVisibilityObserver = object : ItemVisibilityObserver {
-                        override fun onItemBecameVisible(position: Position) {
-                            this@ViewHolder.impressionsTracker.onItemBecameVisible(
-                                SectionItemDescriptor(adapterPosition, position)
+                    itemVisibilityObserver = object : ItemVisibilityObserver<Position> {
+                        override fun onItemBecameVisible(itemDescriptor: Position) {
+                            this@MySectionsAdapter.itemVisibilityObserver.onItemBecameVisible(
+                                SectionItemDescriptor(adapterPosition, itemDescriptor)
                             )
                         }
 
-                        override fun onItemBecameNotVisible(position: Position) {
-                            this@ViewHolder.impressionsTracker.onItemBecameNotVisible(
-                                SectionItemDescriptor(adapterPosition, position)
+                        override fun onItemBecameNotVisible(itemDescriptor: Position) {
+                            this@MySectionsAdapter.itemVisibilityObserver.onItemBecameNotVisible(
+                                SectionItemDescriptor(adapterPosition, itemDescriptor)
                             )
                         }
-
                     }
                 }
             }
@@ -87,8 +83,7 @@ class MySectionsAdapter : RecyclerView.Adapter<MySectionsAdapter.ViewHolder>() {
                 R.layout.section,
                 parent,
                 false
-            ),
-            impressionsTracker
+            )
         )
     }
 

@@ -3,7 +3,6 @@ package net.rossharper.impressionsexperiment.impressions.domain
 import net.rossharper.impressionsexperiment.impressions.domain.usecases.ImpressionTimeElapsedUseCase
 import net.rossharper.impressionsexperiment.impressions.domain.usecases.ItemBecameNotVisibleUseCase
 import net.rossharper.impressionsexperiment.impressions.domain.usecases.ItemBecameVisibleUseCase
-import net.rossharper.impressionsexperiment.impressions.ui.ItemVisibilityObserver
 import java.util.*
 
 const val IMPRESSION_DURATION_THRESHOLD: Long = 1000
@@ -36,5 +35,5 @@ fun <ItemDescriptorT> createImpressionsTracker(
             impressionsModel
         )
 
-    return ImpressionsTrackerImpl(itemBecameVisibleUseCase, itemBecameNotVisibleUseCase)
+    return UseCaseImpressionsTracker(itemBecameVisibleUseCase, itemBecameNotVisibleUseCase)
 }

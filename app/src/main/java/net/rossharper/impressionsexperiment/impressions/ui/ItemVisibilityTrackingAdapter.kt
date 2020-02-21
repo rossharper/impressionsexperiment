@@ -6,12 +6,12 @@ import net.rossharper.impressionsexperiment.impressions.Position
 abstract class ItemVisibilityTrackingAdapter<ViewHolderT : RecyclerView.ViewHolder>(
     private val itemVisibilityStrategy: ItemVisibilityStrategy)
     : RecyclerView.Adapter<ViewHolderT>(),
-    ItemVisibilityObservable {
+    ItemVisibilityObservable<Position> {
 
     private val attachedViews = HashSet<ViewHolderT>()
     private val visiblePositions = HashSet<Position>()
 
-    override var itemVisibilityObserver: ItemVisibilityObserver? = null
+    override var itemVisibilityObserver: ItemVisibilityObserver<Position>? = null
 
     override fun onViewAttachedToWindow(holder: ViewHolderT) {
         super.onViewAttachedToWindow(holder)
