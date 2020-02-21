@@ -17,9 +17,9 @@ class ItemBecameVisibleUseCase(
 ) {
     fun execute(position: Position) {
         // TODO: thread safety - synchronise adding/removing/reading from maps
-        Log.i("IMPRESSIONS", "Position ${position} became visible")
+        Log.v("IMPRESSIONS", "Position ${position} became visible")
         if (impressionNotAlreadySent(position)) {
-            Log.i("IMPRESSIONS", "Position ${position} not impressed yet")
+            Log.v("IMPRESSIONS", "Position ${position} not impressed yet")
             addVisiblePosition(position)
             waitForImpressions()
         }
@@ -39,7 +39,7 @@ class ItemBecameVisibleUseCase(
                 delay(impressionDurationThresholdMillis)
                 impressionTimeElapsedUseCase.execute()
             }
-            Log.i("IMPRESSIONS", "Timer started")
+            Log.v("IMPRESSIONS", "Timer started")
         }
     }
 }

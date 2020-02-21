@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.rossharper.impressionsexperiment.impressions.Position
+import net.rossharper.impressionsexperiment.impressions.domain.ImpressionObserver
 import net.rossharper.impressionsexperiment.impressions.domain.ImpressionsModel
 import net.rossharper.impressionsexperiment.impressions.domain.Timestamp
 import net.rossharper.impressionsexperiment.impressions.domain.TimestampProvider
@@ -12,7 +13,8 @@ import net.rossharper.impressionsexperiment.impressions.domain.TimestampProvider
 class ImpressionTimeElapsedUseCase(
     private val model: ImpressionsModel,
     private val timestampProvider: TimestampProvider,
-    private val impressionDurationThresholdMillis : Long
+    private val impressionDurationThresholdMillis: Long,
+    private val impressionObserver: ImpressionObserver
 ) {
     fun execute() {
         sendImpressions()
@@ -46,11 +48,11 @@ class ImpressionTimeElapsedUseCase(
     }
 
     private fun sendImpression(position: Position) {
-        Log.i("IMPRESSIONS", "Impression for position $position")
+        impressionObserver.onImpression(position)
     }
 
     private fun waitForImpressions() {
-        Log.i("IMPRESSIONS", "Delaying another second...")
+        Log.v("IMPRESSIONS", "Delaying another second...")
         GlobalScope.launch {
             delay(impressionDurationThresholdMillis)
             execute()
@@ -58,7 +60,7 @@ class ImpressionTimeElapsedUseCase(
     }
 
     private fun stopWaitingForImpressions() {
-        Log.i("IMPRESSIONS", "Impressions complete")
+        Log.v("IMPRESSIONS", "Impressions complete")
         model.timerActive = false
     }
 }

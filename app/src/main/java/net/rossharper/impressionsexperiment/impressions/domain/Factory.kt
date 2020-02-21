@@ -7,7 +7,7 @@ import java.util.*
 
 const val IMPRESSION_DURATION_THRESHOLD: Long = 1000
 
-fun createImpressionsUseCases(): ImpressionsUseCases {
+fun createImpressionsUseCases(impressionObserver: ImpressionObserver): ImpressionsUseCases {
     val impressionsModel = ImpressionsModel()
     val timestampProvider = object : TimestampProvider {
         override val timeInMillis: Long
@@ -16,7 +16,9 @@ fun createImpressionsUseCases(): ImpressionsUseCases {
     val impressionTimeElapsedUseCase = ImpressionTimeElapsedUseCase(
         impressionsModel,
         timestampProvider,
-        IMPRESSION_DURATION_THRESHOLD
+        IMPRESSION_DURATION_THRESHOLD,
+        impressionObserver
+
     )
     val itemBecameVisibleUseCase =
         ItemBecameVisibleUseCase(
