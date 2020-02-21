@@ -1,0 +1,58 @@
+@startuml
+
+note as Impressions #lightblue
+   Impressions classes
+end note
+
+note as App #lightyellow
+    App/Feature classes
+end note
+
+package impresssions.ui {
+    interface ItemVisibilityObserver<ItemDescriptorT> #lightblue
+    class ItemVisibilityTrackingAdapter #lightblue
+    interface ItemVisibilityStrategy
+    class HalfVisibleItemVisibilityStrategy
+}
+package impressions.domain {
+    interface ImpressionObserver #lightblue
+    class ImpressionsTracker #lightblue
+}
+
+
+class TelemetryGateway
+class MainViewModel<SectionItemDescriptor>
+class MainActivity
+class SectionItemsVisibilityObserver<Position> <<anonymous>>
+class SectionItemsAdapter
+class SectionsAdapter
+class AnonImpressionObserver <<anonymous>>
+
+
+SectionItemsAdapter ..|> ItemVisibilityTrackingAdapter
+
+SectionsAdapter "1" *-- "*" SectionItemsAdapter
+SectionsAdapter *-- ItemVisibilityObserver : observer<SectionItemDescriptor>
+
+
+SectionItemsVisibilityObserver ..|> ItemVisibilityObserver
+SectionsAdapter +-- SectionItemsVisibilityObserver
+
+ItemVisibilityTrackingAdapter *-- ItemVisibilityObserver : observer<Position>
+
+ItemVisibilityTrackingAdapter *-- ItemVisibilityStrategy
+HalfVisibleItemVisibilityStrategy .up.|> ItemVisibilityStrategy
+
+MainViewModel ..|> ItemVisibilityObserver
+MainViewModel *-- ImpressionsTracker
+
+AnonImpressionObserver ..|> ImpressionObserver
+MainViewModel +-- AnonImpressionObserver
+MainViewModel *-- TelemetryGateway
+
+ImpressionsTracker *-- ImpressionObserver
+
+MainActivity *-- MainViewModel
+MainActivity *-- SectionsAdapter
+
+@enduml
