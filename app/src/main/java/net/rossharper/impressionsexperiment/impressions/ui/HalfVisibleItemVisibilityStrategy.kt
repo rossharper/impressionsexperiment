@@ -3,8 +3,8 @@ package net.rossharper.impressionsexperiment.impressions.ui
 import android.graphics.Rect
 import android.view.View
 
-class HalfVisibleImpressionVisibilityStrategy :
-    ImpressionVisibilityStrategy {
+class HalfVisibleItemVisibilityStrategy :
+    ItemVisibilityStrategy {
 
     override fun isVisible(view: View): Boolean = view.isAtLeastHalfVisible
 

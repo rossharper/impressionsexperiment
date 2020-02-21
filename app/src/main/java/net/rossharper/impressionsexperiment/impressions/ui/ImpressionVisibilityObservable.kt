@@ -2,11 +2,11 @@ package net.rossharper.impressionsexperiment.impressions.ui
 
 import net.rossharper.impressionsexperiment.impressions.Position
 
-interface ImpressionVisibilityObserver {
+interface ItemVisibilityObserver {
     fun onItemBecameVisible(position: Position)
     fun onItemBecameNotVisible(position: Position)
 }
 
-interface ItemImpressionVisibilityObservable {
-    var impressionVisibilityObserver: ImpressionVisibilityObserver?
+interface ItemVisibilityObservable {
+    var itemVisibilityObserver: ItemVisibilityObserver?
 }

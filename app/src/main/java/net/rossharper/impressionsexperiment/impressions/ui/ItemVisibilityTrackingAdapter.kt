@@ -3,13 +3,15 @@ package net.rossharper.impressionsexperiment.impressions.ui
 import androidx.recyclerview.widget.RecyclerView
 import net.rossharper.impressionsexperiment.impressions.Position
 
-abstract class ImpressionsVisibilityAdapter<ViewHolderT : RecyclerView.ViewHolder>(private val impressionVisibilityStrategy: ImpressionVisibilityStrategy) : RecyclerView.Adapter<ViewHolderT>(),
-    ItemImpressionVisibilityObservable {
+abstract class ItemVisibilityTrackingAdapter<ViewHolderT : RecyclerView.ViewHolder>(
+    private val itemVisibilityStrategy: ItemVisibilityStrategy)
+    : RecyclerView.Adapter<ViewHolderT>(),
+    ItemVisibilityObservable {
 
     private val attachedViews = HashSet<ViewHolderT>()
     private val visiblePositions = HashSet<Position>()
 
-    override var impressionVisibilityObserver: ImpressionVisibilityObserver? = null
+    override var itemVisibilityObserver: ItemVisibilityObserver? = null
 
     override fun onViewAttachedToWindow(holder: ViewHolderT) {
         super.onViewAttachedToWindow(holder)
@@ -23,12 +25,12 @@ abstract class ImpressionsVisibilityAdapter<ViewHolderT : RecyclerView.ViewHolde
         attachedViews.remove(holder)
         if(visiblePositions.contains(holder.adapterPosition)) {
             visiblePositions.remove(holder.adapterPosition)
-            impressionVisibilityObserver?.onItemBecameNotVisible(holder.adapterPosition)
+            itemVisibilityObserver?.onItemBecameNotVisible(holder.adapterPosition)
         }
     }
 
     private val onDrawListener = {
-        detectNewImpressions()
+        detectNewVisibleItems()
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -43,18 +45,18 @@ abstract class ImpressionsVisibilityAdapter<ViewHolderT : RecyclerView.ViewHolde
         recyclerView.viewTreeObserver.removeOnDrawListener(onDrawListener)
     }
 
-    private fun detectNewImpressions() {
+    private fun detectNewVisibleItems() {
         attachedViews.forEach { viewHolder ->
 
-            if (impressionVisibilityStrategy.isVisible(viewHolder.itemView)) {
+            if (itemVisibilityStrategy.isVisible(viewHolder.itemView)) {
                 if (!visiblePositions.contains(viewHolder.adapterPosition)) {
                     visiblePositions.add(viewHolder.adapterPosition)
-                    impressionVisibilityObserver?.onItemBecameVisible(viewHolder.adapterPosition)
+                    itemVisibilityObserver?.onItemBecameVisible(viewHolder.adapterPosition)
                 }
             } else {
                 if (visiblePositions.contains(viewHolder.adapterPosition)) {
                     visiblePositions.remove(viewHolder.adapterPosition)
-                    impressionVisibilityObserver?.onItemBecameNotVisible(viewHolder.adapterPosition)
+                    itemVisibilityObserver?.onItemBecameNotVisible(viewHolder.adapterPosition)
                 }
             }
         }
