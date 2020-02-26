@@ -11,8 +11,8 @@ end note
 package impresssions.ui {
     interface ItemVisibilityObserver<ItemDescriptorT> #lightblue
     class ItemVisibilityTrackingAdapter #lightblue
-    interface ItemVisibilityStrategy
-    class HalfVisibleItemVisibilityStrategy
+    interface ItemVisibilityStrategy  #lightblue
+    class HalfVisibleItemVisibilityStrategy  #lightblue
 }
 package impressions.domain {
     interface ImpressionObserver #lightblue
